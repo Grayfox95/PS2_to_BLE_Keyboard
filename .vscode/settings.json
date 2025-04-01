@@ -1,0 +1,23 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "files.associations": {
+    "ps2_to_hid.h": "c",
+    "gpio_example_main.h": "c",
+    "freertos.h": "c",
+    "ratio": "c",
+    "gpio.h": "c",
+    "gpio_struct.h": "c",
+    "rtc_cntl_reg.h": "c",
+    "hid_dev.h": "c",
+    "stdio.h": "c",
+    "lp_io.h": "c",
+    "rtc_io_hal.h": "c",
+    "rtc_io_periph.h": "c",
+    "rtc_io.h": "c",
+    "event_groups.h": "c"
+  },
+  "idf.adapterTargetName": "esp32",
+  "idf.flashType": "UART",
+  "idf.portWin": "COM142",
+  "idf.pythonInstallPath": "C:\\Users\\AntonioPer\\.espressif\\tools\\idf-python\\3.11.2\\python.exe"
+}
