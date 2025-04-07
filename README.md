@@ -1,83 +1,64 @@
-| Supported Targets | ESP32 | ESP32-C2 | ESP32-C3 | ESP32-C6 | ESP32-H2 | ESP32-S3 |
-| ----------------- | ----- | -------- | -------- | -------- | -------- | -------- |
+# ESP-IDF PS/2 to BLE HID Keyboard converter
+by Antonio Perra 07.04.2025
 
-# ESP-IDF BLE HID Example
+## About
+This project implements a PS/2 to BT HID converter for ESP32 to renovate old PS/2 Keyboards.
 
-This example implement a BLE HID device profile related functions, in which the HID device has 4 Reports:
+The development is based on the [ESP-IDF BLE HID Example](https://github.com/espressif/esp-idf/tree/a25e7ab59ed197817d4a78e139220b2707481f67/examples/bluetooth/bluedroid/ble/ble_hid_device_demo) from which I wrote the PS/2 library (for interfacing with the PS/2 protocol) and the PS2 to HID convertion.
 
-1. Mouse
-2. Keyboard and LED
-3. Consumer Devices
-4. Vendor devices
+The entire application has been developed and validated with a Model SK-2500 keyboard. 
+However, the PS/2 is a standard protocol and the same application should work with all the keyboards supporting PS/2 Set 2.
 
-Users can choose different reports according to their own application scenarios.
-BLE HID profile inheritance and USB HID class.
+### Features
+The project provides the following features:
 
-## How to Use Example
+1. Map between all the standard keys.
+2. Map of multimedia keys.
+3. Volume control.
+4. Special functionality keys.
+5. Low power mode.
+6. LED control
+7. Coffee button menagement. 
 
-Before project configuration and build, be sure to set the correct chip target using:
+### PS/2 Library
+The PS/2 library uses two GPIOs of the ESP32 to interact with CLK and DATA signals of the PS/2 keyboard.
+This library allows to:
 
-```bash
-idf.py set-target <chip_name>
-```
+1. Receive and analyze the MAKE and BREAK codes from the keyboard.
+2. Send codes to the keyboard.
+3. Parity check and retransmission in case of wrong code.
+4. Keyboard's LED management.
 
-### Hardware Required
+## How to use it
+The ESP must be connected to the CLK and DATA PS/2 keyboard signals.
+The current configuration consists of:
 
-* A development board with ESP32/ESP32-C3/ESP32-H2/ESP32-C2/ESP32-S3 SoC (e.g., ESP32-DevKitC, ESP-WROVER-KIT, etc.)
-* A USB cable for Power supply and programming
+- PS/2 CLK --> GPIO 4
+- PS/2 DATA --> GPIO 5
 
-See [Development Boards](https://www.espressif.com/en/products/devkits) for more information about it.
+Moreover, a GPIO has been dedicated to the Coffee LED:
 
-### Configure the Project
+- Coffee LED --> GPIO 0
 
-* `ble_hidd_demo_main.c`
-This file is the demo to show how to used the HID(you can used it to connected to the smart phone act as the consumer device then can used the button to
-volume++ or volume-- etc., or connected to the Windows 10 PC act as a keyboard or mouse)
+This configuration can be modified acting on the local defines of ps2_dev.c file.
 
-* `hidd_le_prf_int.h`
-This header file includes some HID profile related definitions.
+## Low power mode
+The ESP32 enters in deep sleep low power mode after 2 minutes of inactivity. 
+It is resumed as soon as the CLK signal moves.
 
-* `esp_hidd_prf_api.h` & `esp_hidd_prf_api.c`
-These files contains the the api of the HID profile
-When you used the HID profile, you just need to added the esp_hidd_prf_api.h includes file and send the HID data used the function defined in the esp_hidd_prf_api.c file.
+## Coffee button
+When the coffee button has been pressed a specific routine is executed.
+It consists of sending a HID char to host every 60 seconds.
 
-* `hid_dev.h & hid_dev.c`
-These file define the HID spec related definitions
+## BUGs and improvements 
 
-* `hid_device_le_prf.c`
-This file is the HID profile definition file, it include the main function of the HID profile.
-It mainly includes how to create HID service. If you send and receive HID data and convert the data to keyboard keys,
-the mouse and consumer values are forwarded to the application.
 
-### Build and Flash
+### Missing features
+- [ ] Improve power consumption by porting to a single core application.
+- [ ] Develop battery level measurement.
+- [ ] Develop control to switch between multiple bluetooth devices.
 
-Run `idf.py -p PORT flash monitor` to build, flash and monitor the project.
+### Known problems
+- [] '<' and '>' keys are not printed.
 
-(To exit the serial monitor, type ``Ctrl-]``.)
 
-See the [Getting Started Guide](https://idf.espressif.com/) for full steps to configure and use ESP-IDF to build projects.
-
-## Example Output
-
-```
-I (0) cpu_start: Starting scheduler on APP CPU.
-I (584) BTDM_INIT: BT controller compile version [1342a48]
-I (584) system_api: Base MAC address is not set
-I (584) system_api: read default base MAC address from EFUSE
-I (594) phy_init: phy_version 4670,719f9f6,Feb 18 2021,17:07:07
-I (1024) HID_LE_PRF: esp_hidd_prf_cb_hdl(), start added the hid service to the stack database. incl_handle = 40
-I (1034) HID_LE_PRF: hid svc handle = 2d
-I (5964) HID_LE_PRF: HID connection establish, conn_id = 0
-I (5964) HID_DEMO: ESP_HIDD_EVENT_BLE_CONNECT
-I (6744) HID_DEMO: remote BD_ADDR: 7767f4abe386
-I (6744) HID_DEMO: address type = 1
-I (6744) HID_DEMO: pair status = success
-I (8024) HID_DEMO: Send the volume
-I (16024) HID_DEMO: Send the volume
-I (24024) HID_DEMO: Send the volume
-I (27784) HID_DEMO: ESP_HIDD_EVENT_BLE_DISCONNECT
-```
-
-## Troubleshooting
-
-For any technical queries, please open an [issue](https://github.com/espressif/esp-idf/issues) on GitHub. We will get back to you soon.
